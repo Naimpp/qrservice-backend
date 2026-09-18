@@ -37,14 +37,14 @@ class Equipo(EquipoBase):
     qr_base64: Optional[str] = None
     creado_en: Optional[datetime] = None
     actualizado_en: Optional[datetime] = None
-    
+
     @field_validator('fecha_ingreso', mode='before')
     @classmethod
     def convert_date_to_string(cls, v):
         if isinstance(v, date):
             return v.isoformat()
         return v
-    
+
     class Config:
         from_attributes = True
 
@@ -65,6 +65,7 @@ class IntervencionBase(BaseModel):
     repuestos: Optional[str] = None
     mediciones: Optional[str] = None
     observaciones: Optional[str] = None
+    dias_garantia: Optional[int] = None  # ⭐ NUEVO
 
 class IntervencionCreate(IntervencionBase):
     pass
@@ -77,21 +78,23 @@ class IntervencionUpdate(BaseModel):
     repuestos: Optional[str] = None
     mediciones: Optional[str] = None
     observaciones: Optional[str] = None
+    dias_garantia: Optional[int] = None  # ⭐ NUEVO
 
 class Intervencion(IntervencionBase):
     id: int
     equipo_id: int
     pdf: Optional[str] = None
+    dias_garantia: Optional[int] = None  # ⭐ NUEVO
     creado_en: Optional[datetime] = None
     actualizado_en: Optional[datetime] = None
-    
+
     @field_validator('fecha', mode='before')
     @classmethod
     def convert_date_to_string(cls, v):
         if isinstance(v, date):
             return v.isoformat()
         return v
-    
+
     class Config:
         from_attributes = True
 
@@ -145,6 +148,6 @@ class CitaResponse(BaseModel):
     equipo_id: Optional[int] = None
     creado_en: Optional[datetime] = None
     actualizado_en: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True

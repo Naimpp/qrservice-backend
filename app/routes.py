@@ -69,6 +69,25 @@ def convertir_equipo_a_dict(equipo, qr_base64=None):
         "actualizado_en": convertir_fecha_a_string(equipo.actualizado_en)
     }
 
+def convertir_intervencion_a_dict(inter):
+    """Convierte un objeto Intervencion a dict con fechas como string"""
+    return {
+        "id": inter.id,
+        "equipo_id": inter.equipo_id,
+        "fecha": convertir_fecha_a_string(inter.fecha),
+        "tipo_trabajo": inter.tipo_trabajo,
+        "motivo": inter.motivo,
+        "diagnostico": inter.diagnostico,
+        "trabajo_realizado": inter.trabajo_realizado,
+        "repuestos": inter.repuestos,
+        "mediciones": inter.mediciones,
+        "observaciones": inter.observaciones,
+        "pdf": inter.pdf,
+        "dias_garantia": inter.dias_garantia,  # ⭐ NUEVO
+        "creado_en": convertir_fecha_a_string(inter.creado_en),
+        "actualizado_en": convertir_fecha_a_string(inter.actualizado_en)
+    }
+
 # ============================================================
 # ENDPOINTS DE EQUIPOS
 # ============================================================
@@ -184,21 +203,8 @@ def buscar_equipos(
         
         intervenciones_list = []
         for inter in intervenciones:
-            inter_dict = {
-                "id": inter.id,
-                "equipo_id": inter.equipo_id,
-                "fecha": convertir_fecha_a_string(inter.fecha),
-                "tipo_trabajo": inter.tipo_trabajo,
-                "motivo": inter.motivo,
-                "diagnostico": inter.diagnostico,
-                "trabajo_realizado": inter.trabajo_realizado,
-                "repuestos": inter.repuestos,
-                "mediciones": inter.mediciones,
-                "observaciones": inter.observaciones,
-                "pdf": inter.pdf,
-                "creado_en": convertir_fecha_a_string(inter.creado_en),
-                "actualizado_en": convertir_fecha_a_string(inter.actualizado_en)
-            }
+            # ⭐ NUEVO: usa el helper, que ya incluye dias_garantia
+            inter_dict = convertir_intervencion_a_dict(inter)
             intervenciones_list.append(Intervencion(**inter_dict))
         
         equipo_obj = Equipo(**equipo_dict)
@@ -231,21 +237,8 @@ def obtener_equipo(codigo: str, db: Session = Depends(get_db)):
     
     intervenciones_list = []
     for inter in intervenciones:
-        inter_dict = {
-            "id": inter.id,
-            "equipo_id": inter.equipo_id,
-            "fecha": convertir_fecha_a_string(inter.fecha),
-            "tipo_trabajo": inter.tipo_trabajo,
-            "motivo": inter.motivo,
-            "diagnostico": inter.diagnostico,
-            "trabajo_realizado": inter.trabajo_realizado,
-            "repuestos": inter.repuestos,
-            "mediciones": inter.mediciones,
-            "observaciones": inter.observaciones,
-            "pdf": inter.pdf,
-            "creado_en": convertir_fecha_a_string(inter.creado_en),
-            "actualizado_en": convertir_fecha_a_string(inter.actualizado_en)
-        }
+        # ⭐ NUEVO: usa el helper, que ya incluye dias_garantia
+        inter_dict = convertir_intervencion_a_dict(inter)
         intervenciones_list.append(Intervencion(**inter_dict))
     
     equipo_obj = Equipo(**equipo_dict)
@@ -284,6 +277,7 @@ def crear_intervencion(
             except:
                 fecha_intervencion = datetime.now().date()
     
+    # ⭐ NUEVO: guarda dias_garantia
     nueva_intervencion = models.Intervencion(
         equipo_id=equipo.id,
         fecha=fecha_intervencion or datetime.now().date(),
@@ -293,28 +287,16 @@ def crear_intervencion(
         trabajo_realizado=intervencion.trabajo_realizado,
         repuestos=intervencion.repuestos,
         mediciones=intervencion.mediciones,
-        observaciones=intervencion.observaciones
+        observaciones=intervencion.observaciones,
+        dias_garantia=intervencion.dias_garantia
     )
     
     db.add(nueva_intervencion)
     db.commit()
     db.refresh(nueva_intervencion)
     
-    inter_dict = {
-        "id": nueva_intervencion.id,
-        "equipo_id": nueva_intervencion.equipo_id,
-        "fecha": convertir_fecha_a_string(nueva_intervencion.fecha),
-        "tipo_trabajo": nueva_intervencion.tipo_trabajo,
-        "motivo": nueva_intervencion.motivo,
-        "diagnostico": nueva_intervencion.diagnostico,
-        "trabajo_realizado": nueva_intervencion.trabajo_realizado,
-        "repuestos": nueva_intervencion.repuestos,
-        "mediciones": nueva_intervencion.mediciones,
-        "observaciones": nueva_intervencion.observaciones,
-        "pdf": nueva_intervencion.pdf,
-        "creado_en": convertir_fecha_a_string(nueva_intervencion.creado_en),
-        "actualizado_en": convertir_fecha_a_string(nueva_intervencion.actualizado_en)
-    }
+    # ⭐ NUEVO: usa el helper, que ya incluye dias_garantia
+    inter_dict = convertir_intervencion_a_dict(nueva_intervencion)
     
     return Intervencion(**inter_dict)
 
